@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  postgresql:
+    image: postgres:14.0
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_USER: odoo
+    volumes:
+      - ./odoo-dev/odoo-db-data/data:/var/lib/postgresql/data
+  odoo-dev:
+    build: .
+    ports:
+      - 8069:8069
+      - 8072:8072
+      - 8888:8888
+    environment:
+      USER: odoo
+      PASSWORD: odoo
+      HOST: postgresql
+      PORT: 5432
+      ODOO_RC: /etc/odoo/odoo-dev.conf
+    command: /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo --db_user=odoo --db_host=postgresql --db_password=odoo
+    volumes:
+      - ./custom-addons:/mnt/custom-addons
+      - ./odoo-dev.conf:/etc/odoo/odoo-dev.conf
+      - ./odoo-dev/odoo:/var/lib/odoo
